@@ -1,5 +1,30 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Data / experiment artifacts
 data/
+results/
 cifar_results/
+checkpoints/
+runs/
 *.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+
+# Logs / temporary files
+*.log
+*.tmp
+*.temp
