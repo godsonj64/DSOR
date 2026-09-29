@@ -1,124 +1,115 @@
-# DSORNet-v3.1 — Cross-Scale Trajectory State Routing
+# DSORNet-v3.1
 
-This package implements the tested **sequential coordinate-inheritance** version
-of DSORNet.
+**Dynamic Spatial Operator Routing with Cross-Scale Trajectory State Routing (CSTR)** is a convolution-free image model that learns continuous, content-dependent sampling coordinates and transports fine-stage spatial trajectories into a coarse routing stage.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/godsonj64/DSOR/blob/main/colab/DSORNet_v31_Colab.ipynb)
 
 ## Core idea
 
-Stage 1 produces multiple continuous sample positions and routing weights:
+For fine-stage token position (p_i^{(1)}), DSOR predicts fractional offsets
 
 $$
 s_{im}^{(1)} = p_i^{(1)} + \Delta_{im}^{(1)}.
 $$
 
-Their attention-weighted expected absolute location is
+The routing-weighted expected absolute sample location is
 
 $$
-\bar s_i^{(1)} =
-\sum_m \alpha_{im}^{(1)} s_{im}^{(1)}.
+\bar{s}_i^{(1)} = \sum_m \alpha_{im}^{(1)} s_{im}^{(1)}.
 $$
 
-For each 2×2 fine-token group \(G_j\), the coarse trajectory target is
+For a fine-token group (G_j), the trajectory is transported into the coarse coordinate system:
 
 $$
-\hat s_j^{(2)} =
-\mathcal T_{1\rightarrow2}
+\hat{s}_j^{(2)} =
+\mathcal{T}_{1\rightarrow 2}
 \left(
-\frac1{|G_j|}
+\frac{1}{|G_j|}
 \sum_{i\in G_j}
-\bar s_i^{(1)}
+\bar{s}_i^{(1)}
 \right),
+\qquad
+\pi_j^{(2)} = \hat{s}_j^{(2)} - p_j^{(2)}.
 $$
 
-and the inherited coarse displacement is
-
-$$
-\pi_j^{(2)} =
-\hat s_j^{(2)} - p_j^{(2)}.
-$$
-
-Stage 2 does not predict a fresh unrelated offset. It predicts
+Stage 2 combines inherited motion with a bounded residual:
 
 $$
 \Delta_{jm}^{(2)} =
-g_j \odot \pi_j^{(2)} + r_{jm}^{(2)},
+g_j \odot \pi_j^{(2)} + r_{jm}^{(2)}.
 $$
 
-where \(g_j\) is a learned inheritance gate and \(r_{jm}^{(2)}\) is a
-bounded residual correction.
+Later coarse blocks recurrently update the coordinate state from realized routed motion rather than predicting independent deformation fields from scratch.
 
-After the first coarse block, the coordinate state is recurrently updated:
+## Repository
 
-$$
-\tau_j^{(\ell+1)} =
-\tau_j^{(\ell)} +
-\eta_j^{(\ell)}
-\odot
-\left(
-\mu_j^{(\ell)}-\tau_j^{(\ell)}
-\right),
-$$
-
-where \(\mu_j^{(\ell)}\) is the attention-weighted realized displacement.
-
-This creates an explicit **coarse-to-fine-to-coarse spatial search trajectory**.
-
-## Executed tests
-
-- Convolution modules: **0**
-- Zero-motion transport error: **1.19e-7**
-- Constant-motion transport error: **1.49e-7**
-- Cross-scale transport gradient norm: **0.0420**
-- Full forward/backward: **passed**
-- Stage-2 coordinate bounds: **[-1, 1]**
-
-## Small real-image ablation
-
-Dataset: scikit-learn digits, transformed to 32×32 RGB with random
-non-label-dependent appearance variation.
-
-- Train: 1,347
-- Test: 450
-- Epochs: 10
-
-| Model | Params | Clean accuracy | 2px-shift accuracy |
-|---|---:|---:|---:|
-| v2 independent offsets | 120,884 | 94.89% | 74.00% |
-| v3 static inheritance | 142,536 | 94.44% | 74.00% |
-| **v3.1 sequential trajectory** | 145,466 | **95.56%** | **74.44%** |
-
-The most diagnostic change was trajectory alignment in the second coarse block:
-
-- Stage-2 block 1 prior/realized cosine: **0.383**
-- Stage-2 block 2 prior/realized cosine: **0.804**
-
-The recurrent state update therefore made later routing substantially more
-consistent with the inherited search trajectory.
-
-## Real CIFAR-10 small-batch run
-
-```bash
-python -m pip install torch torchvision numpy pytest
-python dsorn_v31.py   --dataset cifar10   --train-per-class 100   --test-per-class 50   --epochs 12   --device mps
+```text
+DSOR/
+├── dsorn_v31.py          # model + CIFAR-10/100 trainer
+├── deployment.py         # frozen inference preparation
+├── imaging.py            # image classification/restoration utilities
+├── cifar_experiment.py   # research comparison driver
+├── tests/                # executable core checks
+├── colab/                # one-click CUDA notebook
+├── requirements.txt
+└── requirements-colab.txt
 ```
 
-## Real CIFAR-100 small-batch run
+Datasets, checkpoints, caches, logs, and generated experiment outputs are excluded from version control.
+
+## Local setup
 
 ```bash
-python dsorn_v31.py   --dataset cifar100   --train-per-class 25   --test-per-class 20   --epochs 15   --device mps
-```
-
-## Tests
-
-```bash
+git clone https://github.com/godsonj64/DSOR.git
+cd DSOR
+python -m pip install -r requirements.txt
 pytest -q
 ```
 
-## Research caution
+## Train on CIFAR-10
 
-This is a research prototype. The small pilot supports the *mechanistic*
-hypothesis that recurrent coordinate-state inheritance can produce more coherent
-routing and slightly better small-data accuracy. It does **not** establish
-state-of-the-art performance or novelty. A literature audit, matched-parameter
-baselines, multiple random seeds, and real CIFAR/ImageNet-scale experiments are
-needed before making such claims.
+```bash
+python dsorn_v31.py \
+  --dataset cifar10 \
+  --train-per-class 100 \
+  --test-per-class 50 \
+  --epochs 12 \
+  --batch-size 128 \
+  --device cuda
+```
+
+For Apple Silicon, use `--device mps`. For CPU-only execution, use `--device cpu`.
+
+## Train on CIFAR-100
+
+```bash
+python dsorn_v31.py \
+  --dataset cifar100 \
+  --train-per-class 25 \
+  --test-per-class 20 \
+  --epochs 15 \
+  --batch-size 128 \
+  --device cuda
+```
+
+The torchvision datasets are downloaded automatically when missing.
+
+## Google Colab / GPU
+
+Open the notebook with the badge above. In Colab, select **Runtime → Change runtime type → T4 GPU** or another NVIDIA accelerator. The notebook verifies CUDA, clones this repository, installs only the extra Colab dependencies, runs the test suite, and launches the same `dsorn_v31.py` training path with `--device cuda`.
+
+This keeps Colab's preinstalled CUDA-enabled PyTorch build intact instead of replacing it with a generic wheel.
+
+## Verification
+
+The cleaned source archive was tested locally with:
+
+```text
+28 passed, 1 skipped
+```
+
+The skipped regression is Apple-MPS-specific when MPS hardware is unavailable. A real CIFAR-10 CPU smoke train also completed end-to-end.
+
+## Research status
+
+This repository is a research prototype. The present results support investigation of recurrent cross-scale coordinate inheritance, not a state-of-the-art or novelty claim. Stronger claims require a literature audit, matched-parameter baselines, multiple independent seeds, full-dataset training, and standardized evaluation.
