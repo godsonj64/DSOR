@@ -6,7 +6,7 @@
 
 ## Core idea
 
-For fine-stage token position (p_i^{(1)}), DSOR predicts fractional offsets
+For fine-stage token position $p_i^{(1)}$, DSOR predicts fractional offsets
 
 $$
 s_{im}^{(1)} = p_i^{(1)} + \Delta_{im}^{(1)}.
@@ -18,7 +18,7 @@ $$
 \bar{s}_i^{(1)} = \sum_m \alpha_{im}^{(1)} s_{im}^{(1)}.
 $$
 
-For a fine-token group (G_j), the trajectory is transported into the coarse coordinate system:
+For a fine-token group $G_j$, the trajectory is transported into the coarse coordinate system:
 
 $$
 \hat{s}_j^{(2)} =
@@ -46,9 +46,9 @@ Later coarse blocks recurrently update the coordinate state from realized routed
 ```text
 DSOR/
 ├── dsorn_v31.py          # model + CIFAR-10/100 trainer
+├── cifar_experiment.py   # self-contained multi-seed experiment + checkpoints
 ├── deployment.py         # frozen inference preparation
 ├── imaging.py            # image classification/restoration utilities
-├── cifar_experiment.py   # research comparison driver
 ├── tests/                # executable core checks
 ├── colab/                # one-click CUDA notebook
 ├── requirements.txt
@@ -66,7 +66,9 @@ python -m pip install -r requirements.txt
 pytest -q
 ```
 
-## Train on CIFAR-10
+## Train DSORNet-v3.1
+
+### CIFAR-10
 
 ```bash
 python dsorn_v31.py \
@@ -78,9 +80,7 @@ python dsorn_v31.py \
   --device cuda
 ```
 
-For Apple Silicon, use `--device mps`. For CPU-only execution, use `--device cpu`.
-
-## Train on CIFAR-100
+### CIFAR-100
 
 ```bash
 python dsorn_v31.py \
@@ -92,13 +92,39 @@ python dsorn_v31.py \
   --device cuda
 ```
 
-The torchvision datasets are downloaded automatically when missing.
+For Apple Silicon, use `--device mps`. For CPU-only execution, use `--device cpu`. The torchvision datasets are downloaded automatically when missing.
+
+## Reproducible experiment with saved checkpoints
+
+Use `cifar_experiment.py` when you want explicit seeds plus saved checkpoints and a machine-readable summary:
+
+```bash
+python cifar_experiment.py \
+  --dataset cifar10 \
+  --train-per-class 100 \
+  --test-per-class 50 \
+  --epochs 12 \
+  --batch-size 128 \
+  --seeds 20260929 20260930 20260931 \
+  --device auto \
+  --output-dir cifar_results
+```
+
+The runner writes one checkpoint per seed and `cifar_results/summary.json`. Device `auto` selects CUDA first, then Apple MPS, then CPU.
 
 ## Google Colab / GPU
 
-Open the notebook with the badge above. In Colab, select **Runtime → Change runtime type → T4 GPU** or another NVIDIA accelerator. The notebook verifies CUDA, clones this repository, installs only the extra Colab dependencies, runs the test suite, and launches the same `dsorn_v31.py` training path with `--device cuda`.
+Open the notebook with the badge above. In Colab, select **Runtime → Change runtime type → T4 GPU** or another NVIDIA accelerator. The notebook:
 
-This keeps Colab's preinstalled CUDA-enabled PyTorch build intact instead of replacing it with a generic wheel.
+1. verifies CUDA and reports the GPU,
+2. clones this repository,
+3. preserves Colab's CUDA-enabled PyTorch build,
+4. installs only the extra dependencies,
+5. runs the repository tests,
+6. verifies a DSOR forward pass on CUDA, and
+7. launches CIFAR training with `--device cuda`.
+
+An optional notebook cell uses `cifar_experiment.py` to save a checkpoint and JSON summary.
 
 ## Verification
 
@@ -108,7 +134,7 @@ The cleaned source archive was tested locally with:
 28 passed, 1 skipped
 ```
 
-The skipped regression is Apple-MPS-specific when MPS hardware is unavailable. A real CIFAR-10 CPU smoke train also completed end-to-end.
+The skipped regression is Apple-MPS-specific when MPS hardware is unavailable. A real CIFAR-10 CPU smoke train completed end-to-end, and the cleaned experiment runner also completed a one-epoch CIFAR-10 smoke run while writing a checkpoint and `summary.json`.
 
 ## Research status
 
