@@ -202,8 +202,11 @@ class DistributionStateUpdate(nn.Module):
 
 class DSORNetV32Distribution(BackboneBase):
     """Same-width classifier with explicit sampling-distribution transport."""
-    def __init__(self,num_classes=10,d1=32,d2=48,d3=64):
+    def __init__(self,num_classes=10,d1=32,d2=48,d3=64,memory_mode='particles'):
         super().__init__(num_classes,d1,d2,d3)
+        if memory_mode not in ('particles', 'mean'):
+            raise ValueError('memory_mode must be particles or mean')
+        self.memory_mode = memory_mode
         # Distinct initial fine sampling points within the existing L-infinity bound.
         pattern = torch.tensor([[-1.,-1.],[-1.,1.],[1.,-1.],[1.,1.]]) * 0.08
         with torch.no_grad():
@@ -215,8 +218,14 @@ class DSORNetV32Distribution(BackboneBase):
     def forward(self,x,return_aux=False):
         fine, a1 = self.stage1(self.stem(x),True)
         state1 = transport_fine_distribution(a1)
+        if self.memory_mode == 'mean':
+            mean, _ = distribution_moments(state1)
+            state1 = TrajectoryDistribution(mean.unsqueeze(-2), state1.weights[..., :1]*0+1)
         coarse, a2 = self.stage2a(self.coarse(fine),state1,True)
         state2, eta = self.state_update(coarse,state1,a2)
+        if self.memory_mode == 'mean':
+            mean, _ = distribution_moments(state2)
+            state2 = TrajectoryDistribution(mean.unsqueeze(-2), state2.weights[..., :1]*0+1)
         if return_aux:
             coarse,a3 = self.stage2b(coarse,state2,True)
         else:

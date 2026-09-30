@@ -1,0 +1,8 @@
+# Reference CPU environment for both Python 3.11 and 3.12.
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+numpy==2.2.6
+pytest==8.3.5
+nbformat==5.10.4
+# torch adds setuptools as a conditional dependency on Python 3.12.
+setuptools==75.8.0

@@ -26,7 +26,8 @@ from dsorn_v32 import DSORNetV32Distribution, trajectory_energy
 
 SCHEMA = 2
 MODELS = {"v2": DSORNetV2Independent, "v31": DSORNetV31Sequential,
-          "v32": DSORNetV32Distribution}
+          "v32": DSORNetV32Distribution,
+          "v32-mean": lambda **kwargs: DSORNetV32Distribution(memory_mode="mean", **kwargs)}
 
 
 def seed_all(seed):
@@ -358,7 +359,7 @@ def run_seed(args, seed, device, loaded, run_id):
     model.load_state_dict(chosen["model_state_dict"])
     # Test once after validation selection; paused training never tests.
     test_loader = DataLoader(test_ds, batch_size=max(args.batch_size, 256), num_workers=0)
-    test_metrics = evaluate(model, test_loader, device)
+    test_metrics = None if args.validation_only else evaluate(model, test_loader, device)
     result = {"run_id": run_id, "seed": seed, "architecture": args.architecture,
               "parameters": sum(p.numel() for p in model.parameters()),
               "best_validation": best, "test": test_metrics,
@@ -390,6 +391,7 @@ def parse_args(argv=None):
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--amp", action="store_true", help="CUDA float16 autocast; default float32")
     parser.add_argument("--resume", action="store_true", help="resume the same configuration from last.pt")
+    parser.add_argument("--validation-only", action="store_true", help="development ablation: never evaluate test data")
     parser.add_argument("--stop-after-epoch", type=int, help="pause at an epoch boundary without testing")
     args = parser.parse_args(argv)
     for name in ("train_per_class", "val_per_class", "test_per_class", "epochs", "batch_size", "threads"):
@@ -450,10 +452,11 @@ def main(argv=None):
             atomic_json(args.output_dir / "status.json", {"state": "paused", "seed": seed})
             return
         results.append(result)
-        accuracies = [item["test"]["accuracy"] for item in results]
+        accuracies = [item["test"]["accuracy"] for item in results if item["test"] is not None]
         summary = {"run_id": identity, "architecture": args.architecture, "runs": results,
                    "completed_seeds": len(results), "requested_seeds": len(args.seeds),
-                   "mean_test_accuracy": float(np.mean(accuracies)),
+                   "mean_validation_accuracy": float(np.mean([item["best_validation"]["accuracy"] for item in results])),
+                   "mean_test_accuracy": float(np.mean(accuracies)) if accuracies else None,
                    "std_test_accuracy": float(np.std(accuracies, ddof=1)) if len(accuracies) > 1 else None}
         atomic_json(args.output_dir / "summary.json", summary)
     atomic_json(args.output_dir / "status.json", {"state": "complete"})

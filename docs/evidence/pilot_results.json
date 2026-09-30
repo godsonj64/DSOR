@@ -1,0 +1,279 @@
+{
+  "status": "exploratory small-training-subset pilot; no accuracy advantage established",
+  "measured_source_commit": "1fb94df122bcb9316d6316841dc5e2f6539affbc",
+  "measured_source_sha256": {
+    "dsorn_v31.py": "445606d91c608d79128d0751ec9e7df223d9282d0c845efa4231ec4aa4b1a8a3",
+    "dsorn_v32.py": "1601b4f6ef034f9d858b2d847e6c257777127a1df592d5ea2a3460e4670b5fc9",
+    "cifar_experiment.py": "9ee6a411fb2c9a44e8708772f4c4d5cd6542b4eb9f28e47d5f0bd92f63a5992f"
+  },
+  "original_execution_source_record": {
+    "git_revision": "24e6fb7ff547b38ed23faae039a96805f034e394",
+    "git_dirty": true,
+    "sha256": {
+      "dsorn_v31.py": "445606d91c608d79128d0751ec9e7df223d9282d0c845efa4231ec4aa4b1a8a3",
+      "dsorn_v32.py": "1601b4f6ef034f9d858b2d847e6c257777127a1df592d5ea2a3460e4670b5fc9",
+      "cifar_experiment.py": "9ee6a411fb2c9a44e8708772f4c4d5cd6542b4eb9f28e47d5f0bd92f63a5992f"
+    }
+  },
+  "environment": {
+    "python": "3.12.14",
+    "torch": "2.5.1+cpu",
+    "torchvision": "0.20.1+cpu",
+    "numpy": "2.5.2",
+    "device": "cpu",
+    "cuda": null,
+    "cudnn": null,
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "gpu": null,
+    "threads": 2
+  },
+  "config": {
+    "architecture": "v32",
+    "dataset": "cifar10",
+    "train_per_class": 100,
+    "val_per_class": 50,
+    "test_per_class": 1000,
+    "epochs": 30,
+    "batch_size": 128,
+    "lr": 0.0028,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "mixup": 0.2,
+    "trajectory_weight": 0.01,
+    "warmup_epochs": 3,
+    "seeds": [
+      20260929,
+      20260930,
+      20260931
+    ],
+    "split_seed": 20260929,
+    "device": "cpu",
+    "threads": 2,
+    "amp": false
+  },
+  "data": {
+    "num_classes": 10,
+    "dataset_sha256": "6b3883dca6c867f1e58def548c063d1865569b8575fcbce06b3e468a89f9895a",
+    "normalization": {
+      "mean": [
+        0.4914,
+        0.4822,
+        0.4465
+      ],
+      "std": [
+        0.247,
+        0.2435,
+        0.2616
+      ]
+    },
+    "counts": {
+      "train": 1000,
+      "validation": 500,
+      "test": 10000
+    },
+    "split_sha256": {
+      "train": "f851bad2cf646ada7a157ad0f161e4fc41f4636db962b8ae2c9126081ca0ad8a",
+      "validation": "f57baca16f094d59e63c3df9205a9333c7533307bcd1f941f89a5c5ca5741e69",
+      "test": "157d7a6ef9863b409c2bcdc1d79a9ef56a90fc950bf6a5a85912f8d98aa20e08"
+    }
+  },
+  "experiments": {
+    "v31": {
+      "run_id": "941b1cdc8de538444f3d7a771c60aee3e8ec92e9f3f78e606fbb657678fbdf36",
+      "architecture": "v31",
+      "runs": [
+        {
+          "run_id": "941b1cdc8de538444f3d7a771c60aee3e8ec92e9f3f78e606fbb657678fbdf36",
+          "seed": 20260929,
+          "architecture": "v31",
+          "parameters": 145466,
+          "best_validation": {
+            "accuracy": 0.362,
+            "loss": 1.7202579956054687,
+            "count": 500,
+            "epoch": 22
+          },
+          "test": {
+            "accuracy": 0.3912,
+            "loss": 1.6742205442428588,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260929/best.pt"
+        },
+        {
+          "run_id": "941b1cdc8de538444f3d7a771c60aee3e8ec92e9f3f78e606fbb657678fbdf36",
+          "seed": 20260930,
+          "architecture": "v31",
+          "parameters": 145466,
+          "best_validation": {
+            "accuracy": 0.368,
+            "loss": 1.7122775268554689,
+            "count": 500,
+            "epoch": 27
+          },
+          "test": {
+            "accuracy": 0.4115,
+            "loss": 1.6329918281555176,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260930/best.pt"
+        },
+        {
+          "run_id": "941b1cdc8de538444f3d7a771c60aee3e8ec92e9f3f78e606fbb657678fbdf36",
+          "seed": 20260931,
+          "architecture": "v31",
+          "parameters": 145466,
+          "best_validation": {
+            "accuracy": 0.34,
+            "loss": 1.7289571533203125,
+            "count": 500,
+            "epoch": 25
+          },
+          "test": {
+            "accuracy": 0.4038,
+            "loss": 1.6733531171798706,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260931/best.pt"
+        }
+      ],
+      "completed_seeds": 3,
+      "requested_seeds": 3,
+      "mean_test_accuracy": 0.4021666666666666,
+      "std_test_accuracy": 0.010248089252798943
+    },
+    "v32": {
+      "run_id": "a16c9caca49607a5a7f5db80601d5d23ffccd872c137c76af3efac8709a979a6",
+      "architecture": "v32",
+      "runs": [
+        {
+          "run_id": "a16c9caca49607a5a7f5db80601d5d23ffccd872c137c76af3efac8709a979a6",
+          "seed": 20260929,
+          "architecture": "v32",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.364,
+            "loss": 1.7003925170898437,
+            "count": 500,
+            "epoch": 25
+          },
+          "test": {
+            "accuracy": 0.4046,
+            "loss": 1.6359359212875366,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260929/best.pt"
+        },
+        {
+          "run_id": "a16c9caca49607a5a7f5db80601d5d23ffccd872c137c76af3efac8709a979a6",
+          "seed": 20260930,
+          "architecture": "v32",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.354,
+            "loss": 1.7239404907226563,
+            "count": 500,
+            "epoch": 23
+          },
+          "test": {
+            "accuracy": 0.3989,
+            "loss": 1.6495909210205077,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260930/best.pt"
+        },
+        {
+          "run_id": "a16c9caca49607a5a7f5db80601d5d23ffccd872c137c76af3efac8709a979a6",
+          "seed": 20260931,
+          "architecture": "v32",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.348,
+            "loss": 1.7417850341796874,
+            "count": 500,
+            "epoch": 26
+          },
+          "test": {
+            "accuracy": 0.3999,
+            "loss": 1.6757320446014405,
+            "count": 10000
+          },
+          "checkpoint": "seed_20260931/best.pt"
+        }
+      ],
+      "completed_seeds": 3,
+      "requested_seeds": 3,
+      "mean_test_accuracy": 0.40113333333333334,
+      "std_test_accuracy": 0.003043572462310281
+    },
+    "v32-mean": {
+      "run_id": "c53d77d7de6aaf882512754771c67bfa762ed0070ad859886cb0ca1df6134ae5",
+      "architecture": "v32-mean",
+      "runs": [
+        {
+          "run_id": "c53d77d7de6aaf882512754771c67bfa762ed0070ad859886cb0ca1df6134ae5",
+          "seed": 20260929,
+          "architecture": "v32-mean",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.346,
+            "loss": 1.7221422119140626,
+            "count": 500,
+            "epoch": 25
+          },
+          "test": null,
+          "checkpoint": "seed_20260929/best.pt"
+        },
+        {
+          "run_id": "c53d77d7de6aaf882512754771c67bfa762ed0070ad859886cb0ca1df6134ae5",
+          "seed": 20260930,
+          "architecture": "v32-mean",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.354,
+            "loss": 1.7384513549804688,
+            "count": 500,
+            "epoch": 26
+          },
+          "test": null,
+          "checkpoint": "seed_20260930/best.pt"
+        },
+        {
+          "run_id": "c53d77d7de6aaf882512754771c67bfa762ed0070ad859886cb0ca1df6134ae5",
+          "seed": 20260931,
+          "architecture": "v32-mean",
+          "parameters": 144121,
+          "best_validation": {
+            "accuracy": 0.364,
+            "loss": 1.7382032470703126,
+            "count": 500,
+            "epoch": 29
+          },
+          "test": null,
+          "checkpoint": "seed_20260931/best.pt"
+        }
+      ],
+      "completed_seeds": 3,
+      "requested_seeds": 3,
+      "mean_validation_accuracy": 0.3546666666666667,
+      "mean_test_accuracy": null,
+      "std_test_accuracy": null
+    }
+  },
+  "paired_test_differences": [
+    0.013400000000000023,
+    -0.0126,
+    -0.0039000000000000146
+  ],
+  "paired_difference_mean": -0.0010333333333333306,
+  "illustrative_t_interval_95": [
+    -0.03391071842131978,
+    0.031844051754653116
+  ],
+  "interval_scope": "3 seed-level differences conditional on one fixed subset; normality assumption; not a population accuracy guarantee",
+  "ablation_source_sha256": {
+    "dsorn_v31.py": "445606d91c608d79128d0751ec9e7df223d9282d0c845efa4231ec4aa4b1a8a3",
+    "dsorn_v32.py": "bed73703dc00aeafd480f1e4e378490f58f2e655ba46561123fb57ba24d0d71a",
+    "cifar_experiment.py": "2f75c9e474deb2c7dae851d9a0be8ad3b7409a736ed32e3b5fbbb752a9ecd8ec"
+  }
+}
