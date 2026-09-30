@@ -6,8 +6,8 @@ v3.2 distribution memory is experimental. There are no explicit convolution
 modules, although patch embedding and token merging are mathematically strided
 convolutions.
 
-[Open v3.1 in Colab](https://colab.research.google.com/github/godsonj64/DSOR/blob/main/colab/DSORNet_v31_Colab.ipynb) ·
-[Open v3.2 in Colab](https://colab.research.google.com/github/godsonj64/DSOR/blob/main/colab/DSORNet_v32_Colab.ipynb)
+[Open v3.1 in Colab](https://colab.research.google.com/github/godsonj64/DSOR/blob/a3b38ab388c37c1a6397ad03889ed3d164527fe1/colab/DSORNet_v31_Colab.ipynb) ·
+[Open v3.2 in Colab](https://colab.research.google.com/github/godsonj64/DSOR/blob/a3b38ab388c37c1a6397ad03889ed3d164527fe1/colab/DSORNet_v32_Colab.ipynb)
 
 ## Measured status
 
@@ -55,7 +55,7 @@ Use `requirements-ci-3.11-lock.txt` for Python 3.11. These are CPU reference
 stacks. For CUDA or Apple MPS, install a matched torch/torchvision build for the
 platform, then `python -m pip install -r requirements.txt`. In Colab use
 `requirements-colab.txt` to preserve its CUDA-enabled torch/vision/NumPy.
-Local Python 3.11.16 and 3.12.14 checks passed **31 tests, one CUDA test skipped**;
+Local Python 3.11.16 and 3.12.14 checks passed **31 passed, 1 CUDA test skipped**;
 actual Colab/T4 execution was not available during this audit.
 
 ## Train and resume
