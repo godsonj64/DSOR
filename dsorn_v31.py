@@ -147,6 +147,7 @@ def zero_safe_sqrt(value):
 
 def normalized_entropy(weights):
     """Normalized categorical entropy with finite gradients at zero weights."""
+    weights = weights.to(torch.float64 if weights.dtype == torch.float64 else torch.float32)
     samples = weights.shape[-1]
     if samples < 1:
         raise ValueError("at least one routing sample is required")
@@ -157,9 +158,10 @@ def normalized_entropy(weights):
 
 
 def aggregate_stage1_trajectory(stage1_aux, correct_geometry=True):
-    offsets = stage1_aux["offsets"]
-    coords = stage1_aux["coords"]
-    weights = stage1_aux["weights"]
+    dtype = torch.float64 if stage1_aux["coords"].dtype == torch.float64 else torch.float32
+    offsets = stage1_aux["offsets"].to(dtype)
+    coords = stage1_aux["coords"].to(dtype)
+    weights = stage1_aux["weights"].to(dtype)
 
     B, N, M, _ = offsets.shape
     assert N == 64
@@ -169,6 +171,7 @@ def aggregate_stage1_trajectory(stage1_aux, correct_geometry=True):
     reference = stage1_aux.get("reference")
     if reference is None:
         reference = base_grid(8, 8, coords.device, coords.dtype)
+    reference = reference.to(coords)
     effective = coords - reference.unsqueeze(2)
     motion = effective if correct_geometry else offsets
     expected_off = (weights.unsqueeze(-1) * motion).sum(2)
@@ -468,11 +471,12 @@ class TrajectoryStateUpdate(nn.Module):
         nn.init.zeros_(self.gate[-1].bias)
 
     def forward(self, z, old_prior, old_stats, router_aux):
-        weights = router_aux["weights"]
+        dtype = torch.float64 if router_aux["coords"].dtype == torch.float64 else torch.float32
+        weights = router_aux["weights"].to(dtype)
         reference = router_aux.get("reference", self.ref.to(z))
-        total = (router_aux["coords"] - reference.unsqueeze(2)
-                 if self.correct_geometry else router_aux["offsets"])
-        residual = router_aux["residual"]
+        total = (router_aux["coords"].to(dtype) - reference.to(dtype).unsqueeze(2)
+                 if self.correct_geometry else router_aux["offsets"].to(dtype))
+        residual = router_aux["residual"].to(dtype)
 
         realized = (weights.unsqueeze(-1) * total).sum(2)
         expected_residual = (
@@ -775,6 +779,8 @@ def evaluate(model, loader, device):
         x = x.to(device)
         y = y.to(device)
         logits = model(x)
+        if not torch.isfinite(logits).all():
+            raise FloatingPointError("nonfinite evaluation logits")
         correct += int((logits.argmax(1) == y).sum())
         total += len(y)
     if total == 0:
@@ -816,7 +822,9 @@ def train(model, train_loader, test_loader, device, epochs, lr):
                 + 0.01 * trajectory_regularizer(aux)
             )
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 2.0)
+            if not torch.isfinite(loss):
+                raise FloatingPointError("nonfinite training loss")
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 2.0, error_if_nonfinite=True)
             opt.step()
 
         sched.step()
@@ -825,62 +833,10 @@ def train(model, train_loader, test_loader, device, epochs, lr):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dataset",
-        choices=["cifar10", "cifar100"],
-        default="cifar10"
-    )
-    parser.add_argument("--data-dir", default="./data")
-    parser.add_argument("--train-per-class", type=int, default=100)
-    parser.add_argument("--test-per-class", type=int, default=50)
-    parser.add_argument("--epochs", type=int, default=12)
-    parser.add_argument("--batch-size", type=int, default=128)
-    parser.add_argument("--lr", type=float, default=2.8e-3)
-    parser.add_argument(
-        "--device",
-        default=(
-            "mps" if torch.backends.mps.is_available()
-            else "cuda" if torch.cuda.is_available()
-            else "cpu"
-        )
-    )
-    args = parser.parse_args()
-
-    seed_all()
-    print(run_unit_tests())
-
-    train_ds, test_ds, num_classes = make_cifar(
-        args.dataset,
-        args.data_dir,
-        args.train_per_class,
-        args.test_per_class
-    )
-
-    train_loader = torch.utils.data.DataLoader(
-        train_ds,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=0
-    )
-    test_loader = torch.utils.data.DataLoader(
-        test_ds,
-        batch_size=max(args.batch_size, 256),
-        shuffle=False,
-        num_workers=0
-    )
-
-    model = DSORNetV31Sequential(num_classes)
-    device = torch.device(args.device)
-
-    train(
-        model,
-        train_loader,
-        test_loader,
-        device,
-        args.epochs,
-        args.lr
-    )
+    # The public CLI uses the checkpointed validation-first runner. Internal
+    # geometry checks are separate, so they cannot perturb initialization RNG.
+    from cifar_experiment import main as experiment_main
+    experiment_main()
 
 
 if __name__ == "__main__":

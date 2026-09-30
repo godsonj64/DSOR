@@ -1,0 +1,105 @@
+{
+  "torch": "2.5.1+cpu",
+  "python": "3.12.14",
+  "device": "cpu",
+  "threads": 2,
+  "gpu": null,
+  "measurements": [
+    {
+      "architecture": "v31",
+      "kind": "canonical",
+      "batch": 1,
+      "median_ms": 1.846905999855153,
+      "iqr_ms": 0.3483259999939037,
+      "measurement_blocks": 309
+    },
+    {
+      "architecture": "v31",
+      "kind": "prepared",
+      "batch": 1,
+      "median_ms": 1.6311500000938395,
+      "iqr_ms": 0.3104190000158269,
+      "measurement_blocks": 349
+    },
+    {
+      "architecture": "v31",
+      "kind": "canonical",
+      "batch": 32,
+      "median_ms": 8.789721499965708,
+      "iqr_ms": 2.233353500116664,
+      "measurement_blocks": 68
+    },
+    {
+      "architecture": "v31",
+      "kind": "prepared",
+      "batch": 32,
+      "median_ms": 6.630119999954331,
+      "iqr_ms": 0.5036000000018248,
+      "measurement_blocks": 89
+    },
+    {
+      "architecture": "v31",
+      "kind": "canonical",
+      "batch": 128,
+      "median_ms": 20.12194349993024,
+      "iqr_ms": 3.2242889998883584,
+      "measurement_blocks": 28
+    },
+    {
+      "architecture": "v31",
+      "kind": "prepared",
+      "batch": 128,
+      "median_ms": 20.39630500007661,
+      "iqr_ms": 6.027769500065006,
+      "measurement_blocks": 28
+    },
+    {
+      "architecture": "v32",
+      "kind": "canonical",
+      "batch": 1,
+      "median_ms": 2.2961449999456818,
+      "iqr_ms": 0.42605300018294656,
+      "measurement_blocks": 253
+    },
+    {
+      "architecture": "v32",
+      "kind": "prepared",
+      "batch": 1,
+      "median_ms": 2.3514080000950344,
+      "iqr_ms": 0.40079399991554965,
+      "measurement_blocks": 229
+    },
+    {
+      "architecture": "v32",
+      "kind": "canonical",
+      "batch": 32,
+      "median_ms": 11.968250000109038,
+      "iqr_ms": 0.6500609999875451,
+      "measurement_blocks": 50
+    },
+    {
+      "architecture": "v32",
+      "kind": "prepared",
+      "batch": 32,
+      "median_ms": 11.770792499987692,
+      "iqr_ms": 0.5360895002581856,
+      "measurement_blocks": 50
+    },
+    {
+      "architecture": "v32",
+      "kind": "canonical",
+      "batch": 128,
+      "median_ms": 41.15958000011233,
+      "iqr_ms": 1.598318500100504,
+      "measurement_blocks": 15
+    },
+    {
+      "architecture": "v32",
+      "kind": "prepared",
+      "batch": 128,
+      "median_ms": 39.33277500004806,
+      "iqr_ms": 1.0887582498071424,
+      "measurement_blocks": 16
+    }
+  ]
+}

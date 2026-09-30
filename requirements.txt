@@ -1,6 +1,7 @@
-torch>=2.5
-torchvision>=0.20
-numpy>=1.26
-pytest>=8.0
-scikit-learn>=1.4
-matplotlib>=3.8
+# Compatible developer environment. Use requirements-ci-3.11-lock.txt or requirements-ci-3.12-lock.txt for a frozen CPU stack.
+# For CUDA, install a matched torch/torchvision pair for your driver first.
+torch>=2.5,<3
+torchvision>=0.20,<1
+numpy>=1.26,<3
+pytest==8.3.5
+nbformat==5.10.4
