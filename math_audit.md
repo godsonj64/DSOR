@@ -197,8 +197,11 @@ LayerNorm and particle-kernel elementwise arithmetic. The v3.1 q/k/v/output
 projection group saves 983,040 MAC/image against the per-sample projection
 fallback (63.83% for that group only). Whole-network canonical B=1 dense work
 falls from 3,668,480 to 2,685,440. Neither percentage is a wall-time speedup.
-v3.2 has 1,345 fewer parameters but incurs extra kernel/moment work; small
-noisy CPU profiles indicate higher cost. Measure target GPU time and memory
+v3.2 has 1,345 fewer parameters but incurs extra kernel/moment work; isolated
+two-thread CPU measurements found canonical batch-128 medians of 20.12 ms
+(v3.1, IQR 3.22 ms) and 41.16 ms (v3.2, IQR 1.60 ms). Batch-1 medians
+were 1.85 and 2.30 ms. These are host-specific observations, not GPU or
+portable speed claims; full measurements are in `docs/evidence/cpu_benchmark.json`. Measure target GPU time and memory
 before claiming efficiency (`python tools/benchmark.py --device cuda`).
 
 At B=128, sampled feature tensors alone occupy about 7.75 MiB in float32.
