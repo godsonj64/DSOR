@@ -1,6 +1,4 @@
-# Google Colab already provides a CUDA-enabled torch/torchvision build.
-# Keep that build intact and install only the extra dependencies below.
-numpy>=1.26
-pytest>=8.0
-scikit-learn>=1.4
-matplotlib>=3.8
+# Preserve Colab's matched CUDA torch/torchvision and NumPy packages.
+# Their exact versions and pip freeze are saved by the notebook.
+pytest==8.3.5
+nbformat==5.10.4

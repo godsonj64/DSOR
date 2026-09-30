@@ -20,10 +20,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 try:
+    from .dsorn_v32 import DistributionRouter
     from .dsorn_v31 import (
         BackboneBase, IndependentRouter, InheritedRouter, bilinear_sample_tokens,
     )
 except ImportError:
+    from dsorn_v32 import DistributionRouter
     from dsorn_v31 import (
         BackboneBase, IndependentRouter, InheritedRouter, bilinear_sample_tokens,
     )
@@ -192,6 +194,8 @@ def prepare_for_inference(model):
                 setattr(module, name, FrozenIndependentRouter(child))
             elif isinstance(child, InheritedRouter):
                 setattr(module, name, FrozenInheritedRouter(child))
+            elif isinstance(child, DistributionRouter):
+                child.fold_for_inference(CachedPosition)
 
     if not backbone_count:
         raise TypeError("model must contain a DSORNet BackboneBase")
